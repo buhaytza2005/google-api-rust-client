@@ -4,34 +4,13 @@ use reqwest::header::{HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use reqwest::{header::HeaderMap, Client, Url};
 use serde::Deserialize;
 
-// Translates text into the target language.
-// Target must be an ISO 639-1 language code.
-// See https://g.co/cloud/translate/v2/translate-reference#supported_languages
-// https://cloud.google.com/translate/docs/reference/rest/v2/translate
-// https://cloud.google.com/translate/docs/basic/translating-text#translate_translate_text-drest
-
 impl BusinessService {
-    pub async fn accounts(self) -> Result<String> {
+    pub async fn accounts(&mut self) -> Result<String> {
         let base_url = Url::parse(&format!(
             "https://mybusinessbusinessinformation.googleapis.com/v1/accounts/{}",
             ""
         ))?;
-        let mut headers = HeaderMap::new();
-
-        if let Some(api_key) = self.api_key {
-            headers.insert("X-goog-api-key", HeaderValue::from_str(&api_key)?);
-        } else if let Some(mut credentials) = self.service_account_credentials {
-            let token = credentials.get_access_token().await?;
-            headers.insert(
-                AUTHORIZATION,
-                HeaderValue::from_str(&format!("Bearer {}", token))?,
-            );
-        } else {
-            bail!("Unknown Auth Method!")
-        };
-
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        //headers.insert(CONTENT_LENGTH, HeaderValue::from_static("0"));
+        let headers = self.base.create_headers().await?;
         let response = Client::new().get(base_url).headers(headers).send().await?;
 
         let resp: serde_json::Value = response.json().await?;
@@ -53,7 +32,12 @@ impl BusinessService {
             .to_string();
         Ok(acc_id)
     }
-    pub async fn locations(self, account_id: &str) -> Result<Vec<Page>> {
+    pub async fn account(&mut self, account_id: &str) -> &mut Self {
+        self.account_id = Some(account_id.to_string());
+        self
+    }
+
+    pub async fn locations(&mut self) -> Result<Vec<Location>> {
         let mut base_url = Url::parse(&format!(
             //locations
             "https://mybusinessbusinessinformation.googleapis.com/v1/accounts/{}/locations?readMask=name,title,storeCode",
@@ -66,22 +50,9 @@ impl BusinessService {
            // "" 
             "-"
         ))?;
-        let mut headers = HeaderMap::new();
+        let headers = self.base.create_headers().await?;
 
-        if let Some(api_key) = self.api_key {
-            headers.insert("X-goog-api-key", HeaderValue::from_str(&api_key)?);
-        } else if let Some(mut credentials) = self.service_account_credentials {
-            let token = credentials.get_access_token().await?;
-            headers.insert(
-                AUTHORIZATION,
-                HeaderValue::from_str(&format!("Bearer {}", token))?,
-            );
-        } else {
-            bail!("Unknown Auth Method!")
-        };
-
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        let mut result: Vec<Page> = vec![];
+        let mut result: Vec<Location> = vec![];
         loop {
             let response = Client::new()
                 .get(base_url.clone())
@@ -90,7 +61,7 @@ impl BusinessService {
                 .await?;
             let resp: serde_json::Value = response.json().await?;
             let val_pages = resp.get("locations").unwrap().as_array().unwrap().clone();
-            let pages: Vec<Page> = val_pages
+            let pages: Vec<Location> = val_pages
                 .iter()
                 .map(|v| serde_json::from_value(v.clone()).unwrap())
                 .collect();
@@ -111,23 +82,14 @@ impl BusinessService {
 
         Ok(result)
     }
-    pub async fn get_admins(self, locations: &Vec<Page>) -> Result<Vec<PageAdmins>> {
-        let mut headers = HeaderMap::new();
 
-        if let Some(api_key) = self.api_key {
-            headers.insert("X-goog-api-key", HeaderValue::from_str(&api_key)?);
-        } else if let Some(mut credentials) = self.service_account_credentials {
-            let token = credentials.get_access_token().await?;
-            headers.insert(
-                AUTHORIZATION,
-                HeaderValue::from_str(&format!("Bearer {}", token))?,
-            );
-        } else {
-            bail!("Unknown Auth Method!")
-        };
+    pub async fn location(&mut self, location: Location) -> &mut Self {
+        self.location_id = Some(location.name);
+        self 
 
-        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-
+    }
+    pub async fn get_admins(&mut self, locations: &Vec<Location>) -> Result<Vec<PageAdmins>> {
+        let headers = self.base.create_headers().await?;
         let mut results: Vec<PageAdmins> = vec![];
         for location in locations {
             let base_url = Url::parse(&format!(
@@ -156,7 +118,7 @@ impl BusinessService {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct Page {
+pub struct Location {
     pub name: String,
     pub title: String,
     #[serde(rename = "storeCode")]

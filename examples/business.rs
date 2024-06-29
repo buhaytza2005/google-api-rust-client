@@ -1,7 +1,7 @@
 use anyhow::Result;
 use google_api_rust_client_unoffical::{
     auth::service_account::ServiceAccountCredentials,
-    services::business_service::{business::Page, BusinessService},
+    services::business_service::{business::Location, BusinessService},
 };
 use std::{collections::HashMap, path::PathBuf, str::FromStr, vec};
 
@@ -10,13 +10,13 @@ async fn main() -> Result<()> {
     let filepath: PathBuf = PathBuf::from_str("credentials.json").expect("Is this missing?");
     let credentials = ServiceAccountCredentials::from_service_account_file(filepath)
         .expect("this other one missing?");
-    let business_service = BusinessService::new_with_credentials(credentials.clone());
+    let mut business_service = BusinessService::new_with_credentials(credentials.clone());
     let account_id = business_service.accounts().await?;
-    let business_service = BusinessService::new_with_credentials(credentials.clone());
-    let locations = business_service.locations(&account_id).await?;
+    //let business_service = BusinessService::new_with_credentials(credentials.clone());
+    let locations = business_service.locations().await?;
     //println!("response: {}", serde_json::to_string(&response)?);
     //
-    let mut page_counts: HashMap<String, Vec<Page>> = HashMap::new();
+    let mut page_counts: HashMap<String, Vec<Location>> = HashMap::new();
 
     for location in &locations {
         page_counts
@@ -27,7 +27,6 @@ async fn main() -> Result<()> {
 
     let single = &locations[0];
 
-    let business_service = BusinessService::new_with_credentials(credentials.clone());
     let admins = business_service.get_admins(&locations).await?;
 
     let more_than_one_admin = admins
