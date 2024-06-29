@@ -1,5 +1,6 @@
 pub mod translate_service;
 pub mod service_error;
+pub mod business_service;
 
 use anyhow::{bail, Result};
 use reqwest::{header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE}, RequestBuilder};
@@ -8,7 +9,7 @@ use service_error::ServiceErrorResponse;
 use crate::auth::service_account::ServiceAccountCredentials;
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 struct ServiceBase {
     api_key: Option<String>,
     service_account_credentials: Option<ServiceAccountCredentials>,
@@ -27,7 +28,6 @@ impl ServiceBase {
 
 
 impl ServiceBase {
-
     async fn create_headers(&mut self) -> Result<HeaderMap>{
         let mut headers = HeaderMap::new();
 
