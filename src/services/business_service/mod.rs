@@ -5,6 +5,7 @@ pub mod locations;
 use accounts::{Accounts, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
 use endpoint::EndPoint;
+use futures::stream::{FuturesUnordered, StreamExt};
 use locations::{Location, Locations};
 use log::info;
 use reqwest::{
@@ -42,6 +43,10 @@ pub trait BusinessRequest {
         &mut self,
         location: &Location,
     ) -> impl std::future::Future<Output = Result<PageAdmins>> + Send;
+    fn admins(
+        &mut self,
+        location: &Vec<Location>,
+    ) -> impl std::future::Future<Output = Result<Vec<PageAdmins>>> + Send;
 }
 
 impl BusinessService {
@@ -134,13 +139,32 @@ impl BusinessRequest for BusinessService {
 
         let response = self.request(endpoint).await?;
         let resp: Admins = response.json().await?;
-        println!("{:#?}", resp);
 
         Ok(PageAdmins {
             page_name: location.name.clone(),
             page_title: location.title.clone(),
             store_code: location.store_code.clone(),
             admin_count: resp.admins.len(),
+            admins: resp.admins,
         })
+    }
+
+    async fn admins(&mut self, locations: &Vec<Location>) -> Result<Vec<PageAdmins>> {
+        let mut futures = FuturesUnordered::new();
+        let mut results: Vec<PageAdmins> = Vec::new();
+
+        for location in locations {
+            let mut self_clone = self.clone();
+            futures.push(async move { self_clone.admin(location).await })
+        }
+
+        while let Some(result) = futures.next().await {
+            match result {
+                Ok(admin) => results.push(admin),
+                Err(e) => return Err(e),
+            }
+        }
+
+        Ok(results)
     }
 }

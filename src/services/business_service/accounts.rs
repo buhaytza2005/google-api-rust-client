@@ -27,6 +27,7 @@ pub struct PageAdmins {
     #[serde(rename = "storeCode")]
     pub store_code: String,
     pub admin_count: usize,
+    pub admins: Vec<Admin>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

@@ -36,6 +36,11 @@ async fn main() -> Result<()> {
         //let _ = business_service.admin(location).await?;
     }
 
+    let admins = business_service
+        .admins(locations.locations.as_ref())
+        .await?;
+    println!("{:#?}", admins);
+
     /*
         let _account_id = business_service.accounts().await?;
         //let business_service = BusinessService::new_with_credentials(credentials.clone());
