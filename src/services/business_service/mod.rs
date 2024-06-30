@@ -1,5 +1,4 @@
 pub mod accounts;
-pub mod business;
 pub mod endpoint;
 pub mod locations;
 
