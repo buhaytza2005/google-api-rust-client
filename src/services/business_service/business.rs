@@ -5,6 +5,7 @@ use reqwest::{header::HeaderMap, Client, Url};
 use serde::Deserialize;
 
 impl BusinessService {
+    /*
     pub async fn accounts(&mut self) -> Result<String> {
         let base_url = Url::parse(&format!(
             "https://mybusinessbusinessinformation.googleapis.com/v1/accounts/{}",
@@ -38,6 +39,10 @@ impl BusinessService {
     }
 
     pub async fn locations(&mut self) -> Result<Vec<Location>> {
+        let account_id = match self.base.service_account_credentials {
+            Some(_) => "-".to_string(),
+            None => self.account_id.clone().unwrap(),
+        };
         let mut base_url = Url::parse(&format!(
             //locations
             "https://mybusinessbusinessinformation.googleapis.com/v1/accounts/{}/locations?readMask=name,title,storeCode",
@@ -47,8 +52,8 @@ impl BusinessService {
             // "https://mybusiness.googleapis.com/v4/accounts/{}/locations/5031657144081502405/reviews",
             // review
             // "https://mybusiness.googleapis.com/v4/accounts/{}/locations/5031657144081502405/reviews/AbFvOqkfvxRZQjTHdDzmv40njTkoJHGEV7HRvzlp8hYx4ZHFs_6gjDKuPDjgzmKmRZBfjVPTFAgtkQ",
-           // "" 
-            "-"
+           // ""
+            account_id
         ))?;
         let headers = self.base.create_headers().await?;
 
@@ -85,8 +90,7 @@ impl BusinessService {
 
     pub async fn location(&mut self, location: Location) -> &mut Self {
         self.location_id = Some(location.name);
-        self 
-
+        self
     }
     pub async fn get_admins(&mut self, locations: &Vec<Location>) -> Result<Vec<PageAdmins>> {
         let headers = self.base.create_headers().await?;
@@ -115,15 +119,9 @@ impl BusinessService {
 
         Ok(results)
     }
+    */
 }
 
-#[derive(Debug, Deserialize, Clone)]
-pub struct Location {
-    pub name: String,
-    pub title: String,
-    #[serde(rename = "storeCode")]
-    pub store_code: String,
-}
 #[derive(Debug, Deserialize, Clone)]
 pub struct PageAdmins {
     pub page_name: String,
@@ -131,4 +129,11 @@ pub struct PageAdmins {
     #[serde(rename = "storeCode")]
     pub store_code: String,
     pub admin_count: usize,
+}
+
+pub struct Admin {
+    pub account: String,
+    pub admin: String,
+    pub name: String,
+    pub role: String,
 }

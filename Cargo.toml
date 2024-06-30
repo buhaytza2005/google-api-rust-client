@@ -1,16 +1,9 @@
 [package]
-name = "google-api-rust-client-unoffical"
-version = "0.1.3"
+name = "google-api-rust-client-not-offical"
 edition = "2021"
-authors = ["Itsuki <itsuki.enjoy@google.com>"]
-description = "An unoffical client library for Google APIs. "
-readme = "README.md"
-repository = "https://github.com/0Itsuki0/google-api-rust-client.git"
-license = "Apache-2.0"
-license-file = "LICENSE"
-keywords = ["auth", "google", "google-api"]
-categories = ["authentication", "web-programming"]
-
+version = "0.2.0"
+[lib]
+name = "google_api_rust_client_not_official"
 
 [dependencies]
 chrono = "0.4.26"
@@ -24,3 +17,5 @@ dotenv = "0.15.0"
 dotenvy = "0.15.7"
 async-trait = "0.1.73"
 anyhow = "1.0.75"
+logger = "0.4.0"
+log = "0.4.22"
