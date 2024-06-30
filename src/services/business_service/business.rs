@@ -1,7 +1,4 @@
 use super::BusinessService;
-use anyhow::{anyhow, bail, Result};
-use reqwest::header::{HeaderValue, AUTHORIZATION, CONTENT_TYPE};
-use reqwest::{header::HeaderMap, Client, Url};
 use serde::Deserialize;
 
 impl BusinessService {

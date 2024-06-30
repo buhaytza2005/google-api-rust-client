@@ -1,19 +1,18 @@
 use std::vec;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
-
 
 // https://cloud.google.com/apis/design/errors
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServiceErrorResponse {
-    pub error: ErrorResponseStatus
+    pub error: ErrorResponseStatus,
 }
 
 impl Default for ServiceErrorResponse {
     fn default() -> Self {
         Self {
-            error: ErrorResponseStatus::default()
+            error: ErrorResponseStatus::default(),
         }
     }
 }
@@ -26,7 +25,7 @@ pub struct ErrorResponseStatus {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub errors: Option<Vec<Value>>
+    pub errors: Option<Vec<Value>>,
 }
 
 impl Default for ErrorResponseStatus {
@@ -36,7 +35,7 @@ impl Default for ErrorResponseStatus {
             message: "Unknown Error".to_owned(),
             details: vec![],
             status: None,
-            errors: None
+            errors: None,
         }
     }
 }

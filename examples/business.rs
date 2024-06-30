@@ -6,7 +6,7 @@ use google_api_rust_client_not_official::{
         ServiceBase,
     },
 };
-use std::{path::PathBuf, str::FromStr, time::Instant};
+use std::{path::PathBuf, str::FromStr};
 static MY_BUSINESS_SERVICE_SCOPE: &str = "https://www.googleapis.com/auth/plus.business.manage";
 
 #[tokio::main]

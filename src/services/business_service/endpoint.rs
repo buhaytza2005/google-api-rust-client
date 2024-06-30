@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 pub enum EndPoint {
     AccountsEndpoint,
     ///Must contain location name ''
@@ -46,7 +46,6 @@ impl EndPoint {
             EndPoint::LocationsEnpoint(_) => {
                 Ok("https://mybusinessbusinessinformation.googleapis.com".into())
             }
-            _ => Err(anyhow!("Could not find base url for this endpoint")),
         }
     }
 }

@@ -12,5 +12,3 @@ pub struct Location {
 pub struct Locations {
     pub locations: Vec<Location>,
 }
-
-trait LocationRequest {}

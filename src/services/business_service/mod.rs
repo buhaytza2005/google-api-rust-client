@@ -15,8 +15,6 @@ use reqwest::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-static MY_BUSINESS_SERVICE_SCOPE: &str = "https://www.googleapis.com/auth/plus.business.manage";
-
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Default, Clone)]
 pub struct BusinessService {
     access_token: String,
