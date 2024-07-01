@@ -4,6 +4,7 @@ pub enum EndPoint {
     ///Must contain location name ''
     AdminEndpoint(String),
     LocationsEnpoint(String),
+    Reviews(String, String),
 }
 
 pub enum ResourceType {
@@ -24,6 +25,9 @@ impl EndPoint {
                     "/v1/accounts/{}/locations?readMask=name,title,storeCode",
                     account
                 )
+            }
+            EndPoint::Reviews(account_id, location_id) => {
+                format!("/v4/accounts/{}/{}/reviews", account_id, location_id)
             }
         }
     }
@@ -46,6 +50,7 @@ impl EndPoint {
             EndPoint::LocationsEnpoint(_) => {
                 Ok("https://mybusinessbusinessinformation.googleapis.com".into())
             }
+            EndPoint::Reviews(_, _) => Ok("https://mybusiness.googleapis.com".into()),
         }
     }
 }

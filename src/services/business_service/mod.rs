@@ -35,18 +35,30 @@ pub trait BusinessRequest {
 
     fn accounts(&mut self) -> impl std::future::Future<Output = Result<Accounts>> + Send;
 
-    fn locations(
+    fn get_locations(
         &mut self,
         account_id: &str,
     ) -> impl std::future::Future<Output = Result<Locations>> + Send;
+
     fn admin(
         &mut self,
         location: &Location,
     ) -> impl std::future::Future<Output = Result<PageAdmins>> + Send;
+
     fn admins(
         &mut self,
         location: &Vec<Location>,
     ) -> impl std::future::Future<Output = Result<Vec<PageAdmins>>> + Send;
+
+    fn reviews_by_location(
+        &mut self,
+        location: &Location,
+    ) -> impl std::future::Future<Output = Result<Value>> + Send;
+
+    fn review_summary(
+        &mut self,
+        location: &Location,
+    ) -> impl std::future::Future<Output = Result<Value>> + Send;
 }
 
 impl BusinessService {
@@ -86,7 +98,6 @@ impl BusinessRequest for BusinessService {
             url.push_str(format!("&pageToken={}", token.as_str().unwrap()).as_str())
         }
 
-        println!("url is {}", url);
         let client = reqwest::Client::builder().build()?;
         let res = client
             .get(url)
@@ -109,7 +120,8 @@ impl BusinessRequest for BusinessService {
         }
         Ok(accounts)
     }
-    async fn locations(&mut self, account_id: &str) -> Result<Locations> {
+    /// must be sequential as the `nextPageToken` is needed to process the rest of the locations
+    async fn get_locations(&mut self, account_id: &str) -> Result<Locations> {
         let mut locations = Locations::default();
         let mut next_page_token = None;
         loop {
@@ -134,6 +146,7 @@ impl BusinessRequest for BusinessService {
         info!("Retrieved {} locations", locations.locations.len());
         Ok(locations)
     }
+
     async fn admin(&mut self, location: &Location) -> Result<PageAdmins> {
         let endpoint = EndPoint::AdminEndpoint(location.name.clone());
 
@@ -166,5 +179,37 @@ impl BusinessRequest for BusinessService {
         }
 
         Ok(results)
+    }
+
+    async fn reviews_by_location(&mut self, location: &Location) -> Result<Value> {
+        let endpoint = EndPoint::Reviews("-".to_string(), location.name.clone());
+        let res = self.request(endpoint).await.expect("should have reviews");
+
+        let resp: serde_json::Value = res.json().await.expect("should have json");
+        println!("{:#?}", resp);
+        Ok(resp)
+    }
+
+    async fn review_summary(&mut self, location: &Location) -> Result<Value> {
+        let endpoint = EndPoint::Reviews("-".to_string(), location.name.clone());
+        let res = self
+            .request(endpoint)
+            .await
+            .expect("should have reviews for site");
+
+        if !res.status().is_success() {
+            println!("{:#?}", res.status());
+        }
+
+        let resp: serde_json::Value = res.json().await.expect("should have json");
+        let total_reviews = resp.get("totalReviewCount").unwrap_or(&Value::Null);
+        let rating = resp.get("averageRating").unwrap_or(&Value::Null);
+        println!("{:#?}", location);
+        //println!("{:#?}", resp);
+        println!(
+            "{:#?} - total reviews {} - average rating {}",
+            location.title, total_reviews, rating
+        );
+        Ok(resp)
     }
 }
