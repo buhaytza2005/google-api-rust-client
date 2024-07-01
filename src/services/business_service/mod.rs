@@ -40,6 +40,12 @@ pub trait BusinessRequest {
         account_id: &str,
     ) -> impl std::future::Future<Output = Result<Locations>> + Send;
 
+    fn get_locations_details<T: Into<String> + Send>(
+        &mut self,
+        account_id: &str,
+        read_mask: Vec<T>,
+    ) -> impl std::future::Future<Output = Result<Locations>> + Send;
+
     fn admin(
         &mut self,
         location: &Location,
@@ -121,13 +127,64 @@ impl BusinessRequest for BusinessService {
         Ok(accounts)
     }
     /// must be sequential as the `nextPageToken` is needed to process the rest of the locations
+    ///
+    /// * `account id` - ID of account that manages the locations, for service account use `"-"`
     async fn get_locations(&mut self, account_id: &str) -> Result<Locations> {
         let mut locations = Locations::default();
         let mut next_page_token = None;
         loop {
             let response = self
                 .resource_request(
-                    EndPoint::LocationsEnpoint(account_id.into()),
+                    EndPoint::LocationsEndpoint(account_id.into()),
+                    next_page_token.clone(),
+                )
+                .await?;
+            let resp: Value = response.json().await?;
+            let val_pages = &resp.get("locations").unwrap().as_array().unwrap().clone();
+            let pages: Vec<Location> = val_pages
+                .iter()
+                .map(|v| serde_json::from_value(v.clone()).unwrap())
+                .collect();
+            locations.locations.extend(pages);
+            next_page_token = resp.get("nextPageToken").cloned();
+            if next_page_token.is_none() {
+                break;
+            };
+        }
+        info!("Retrieved {} locations", locations.locations.len());
+        Ok(locations)
+    }
+    /// must be sequential as the `nextPageToken` is needed to process the rest of the locations
+    ///
+    ///```rust
+    ///let mask = vec![
+    ///     "storeCode",
+    ///     "title",
+    ///     "name",
+    ///     "phoneNumbers"
+    ///];
+    ///let access_token = get_token().await;
+    ///let mut business_service = BusinessService::new(&access_token);
+
+    ///let locations = business_service.get_locations_details("-", mask).await?;
+    ///
+    ///```
+    ///
+    /// * `account_id` - account that manages the location, for sys users, use `"-"`
+    /// * `read_mask` - Vector of String or &str with the parts of the mask https://developers.google.com/my-business/reference/businessinformation/rest/v1/accounts.locations#Location
+    async fn get_locations_details<T: Into<String> + Send>(
+        &mut self,
+        account_id: &str,
+        read_mask: Vec<T>,
+    ) -> Result<Locations> {
+        let mut locations = Locations::default();
+        let mut next_page_token = None;
+        let read_mask_str: Vec<String> = read_mask.into_iter().map(Into::into).collect();
+        let read_mask_joined = read_mask_str.join(",");
+        loop {
+            let response = self
+                .resource_request(
+                    EndPoint::LocationsDetailsEndpoint(account_id.into(), read_mask_joined.clone()),
                     next_page_token.clone(),
                 )
                 .await?;

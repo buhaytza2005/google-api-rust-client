@@ -1,3 +1,5 @@
+pub mod locations;
+
 use anyhow::Result;
 use google_api_rust_client_not_official::{
     auth::service_account::ServiceAccountCredentials,

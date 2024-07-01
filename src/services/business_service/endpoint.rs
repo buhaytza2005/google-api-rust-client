@@ -3,7 +3,8 @@ pub enum EndPoint {
     AccountsEndpoint,
     ///Must contain location name ''
     AdminEndpoint(String),
-    LocationsEnpoint(String),
+    LocationsDetailsEndpoint(String, String),
+    LocationsEndpoint(String),
     Reviews(String, String),
 }
 
@@ -20,11 +21,14 @@ impl EndPoint {
             EndPoint::AdminEndpoint(location_name) => {
                 format!("/v1/{}/admins", location_name)
             }
-            EndPoint::LocationsEnpoint(account) => {
+            EndPoint::LocationsEndpoint(account) => {
                 format!(
                     "/v1/accounts/{}/locations?readMask=name,title,storeCode",
                     account
                 )
+            }
+            EndPoint::LocationsDetailsEndpoint(account, read_mask) => {
+                format!("/v1/accounts/{}/locations?readMask={}", account, read_mask)
             }
             EndPoint::Reviews(account_id, location_id) => {
                 format!("/v4/accounts/{}/{}/reviews", account_id, location_id)
@@ -47,7 +51,10 @@ impl EndPoint {
             EndPoint::AdminEndpoint(_) => {
                 Ok("https://mybusinessaccountmanagement.googleapis.com".into())
             }
-            EndPoint::LocationsEnpoint(_) => {
+            EndPoint::LocationsEndpoint(_) => {
+                Ok("https://mybusinessbusinessinformation.googleapis.com".into())
+            }
+            EndPoint::LocationsDetailsEndpoint(_, _) => {
                 Ok("https://mybusinessbusinessinformation.googleapis.com".into())
             }
             EndPoint::Reviews(_, _) => Ok("https://mybusiness.googleapis.com".into()),
