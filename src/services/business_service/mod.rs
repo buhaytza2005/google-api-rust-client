@@ -32,6 +32,11 @@ pub trait BusinessRequest {
         endpoint: EndPoint,
         next_page_token: Option<serde_json::Value>,
     ) -> impl std::future::Future<Output = Result<Response>> + Send;
+    fn update_request(
+        &mut self,
+        endpoint: EndPoint,
+        payload: &Location,
+    ) -> impl std::future::Future<Output = Result<Response>> + Send;
 
     fn accounts(&mut self) -> impl std::future::Future<Output = Result<Accounts>> + Send;
 
@@ -45,6 +50,11 @@ pub trait BusinessRequest {
         account_id: &str,
         read_mask: Vec<T>,
     ) -> impl std::future::Future<Output = Result<Locations>> + Send;
+
+    fn update_location(
+        &mut self,
+        location: &Location,
+    ) -> impl std::future::Future<Output = Result<()>> + Send;
 
     fn admin(
         &mut self,
@@ -115,6 +125,25 @@ impl BusinessRequest for BusinessService {
             .send()
             .await
             .expect("Error with request");
+
+        Ok(res)
+    }
+
+    async fn update_request(&mut self, endpoint: EndPoint, payload: &Location) -> Result<Response> {
+        let mut url = EndPoint::build(endpoint).expect("could not build accounts url");
+        url.push_str("?updateMask=title");
+        let client = reqwest::Client::builder().build()?;
+        let res = client
+            .patch(url)
+            .header(
+                header::AUTHORIZATION,
+                HeaderValue::from_str(&format!("Bearer {}", self.access_token.as_str())).unwrap(),
+            )
+            .header(header::CONTENT_TYPE, "application/json")
+            .json(payload)
+            .send()
+            .await
+            .expect("Error with patch request");
 
         Ok(res)
     }
@@ -268,5 +297,19 @@ impl BusinessRequest for BusinessService {
             location.title, total_reviews, rating
         );
         Ok(resp)
+    }
+
+    async fn update_location(&mut self, location: &Location) -> Result<()> {
+        let endpoint = EndPoint::Location(location.name.clone());
+
+        let res = self
+            .update_request(endpoint, location)
+            .await
+            .expect("Should update");
+
+        let resp: Location = res.json().await?;
+        println!("{:#?}", resp);
+
+        Ok(())
     }
 }

@@ -2,7 +2,10 @@ use anyhow::Result;
 use google_api_rust_client_not_official::{
     auth::service_account::ServiceAccountCredentials,
     services::{
-        business_service::{locations::Locations, BusinessRequest, BusinessService},
+        business_service::{
+            locations::{Location, Locations},
+            BusinessRequest, BusinessService,
+        },
         ServiceBase,
     },
 };
@@ -15,6 +18,8 @@ async fn main() -> Result<()> {
     //let _ = fn_get_locations().await?;
     let locations_with_details = fn_get_locations_details().await?;
     println!("{:#?}", locations_with_details);
+
+    let _ = fn_update_location().await?;
 
     Ok(())
 }
@@ -52,4 +57,14 @@ async fn fn_get_locations_details() -> Result<Locations> {
 
     println!("got {} locations", locations.locations.len());
     Ok(locations)
+}
+
+async fn fn_update_location() -> Result<()> {
+    let mut loc = Location::default();
+
+    let access_token = get_token().await;
+    let mut business_service = BusinessService::new(&access_token);
+    let _ = business_service.update_location(&loc).await?;
+
+    Ok(())
 }
