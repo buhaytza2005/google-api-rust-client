@@ -1,11 +1,17 @@
 use anyhow::Result;
+#[derive(Clone)]
 pub enum EndPoint {
     AccountsEndpoint,
     ///Must contain location name ''
     AdminEndpoint(String),
+    ///LocationDetailsEndpoint(account_id, read_mask)
+    ///* account_id - for svc_account `"-"`
+    ///* read_mask - Vector of strings with the fields for the mask
     LocationsDetailsEndpoint(String, String),
+    ///account_id
     LocationsEndpoint(String),
     Location(String),
+    ///Reviews(account_id, location_id)
     Reviews(String, String),
 }
 

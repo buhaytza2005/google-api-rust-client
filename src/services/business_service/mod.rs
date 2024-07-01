@@ -1,6 +1,7 @@
 pub mod accounts;
 pub mod endpoint;
 pub mod locations;
+pub mod reviews;
 
 use accounts::{Accounts, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
@@ -12,6 +13,7 @@ use reqwest::{
     header::{self, HeaderValue},
     Response,
 };
+use reviews::Review;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -69,7 +71,7 @@ pub trait BusinessRequest {
     fn reviews_by_location(
         &mut self,
         location: &Location,
-    ) -> impl std::future::Future<Output = Result<Value>> + Send;
+    ) -> impl std::future::Future<Output = Result<Vec<Review>>> + Send;
 
     fn review_summary(
         &mut self,
@@ -109,11 +111,16 @@ impl BusinessRequest for BusinessService {
         endpoint: EndPoint,
         next_page_token: Option<serde_json::Value>,
     ) -> Result<Response> {
-        let mut url = EndPoint::build(endpoint).expect("could not build accounts url");
+        let mut url = EndPoint::build(endpoint.clone()).expect("could not build accounts url");
         if let Some(token) = next_page_token {
-            url.push_str(format!("&pageToken={}", token.as_str().unwrap()).as_str())
+            match endpoint {
+                EndPoint::Reviews(_, _) => {
+                    url.push_str(format!("?pageToken={}", token.as_str().unwrap()).as_str())
+                }
+                _ => url.push_str(format!("&pageToken={}", token.as_str().unwrap()).as_str()),
+            }
         }
-
+        println!("{:#?}", url);
         let client = reqwest::Client::builder().build()?;
         let res = client
             .get(url)
@@ -267,13 +274,37 @@ impl BusinessRequest for BusinessService {
         Ok(results)
     }
 
-    async fn reviews_by_location(&mut self, location: &Location) -> Result<Value> {
-        let endpoint = EndPoint::Reviews("-".to_string(), location.name.clone());
-        let res = self.request(endpoint).await.expect("should have reviews");
-
-        let resp: serde_json::Value = res.json().await.expect("should have json");
-        println!("{:#?}", resp);
-        Ok(resp)
+    async fn reviews_by_location(&mut self, location: &Location) -> Result<Vec<Review>> {
+        let mut reviews: Vec<Review> = Vec::new();
+        let mut next_page_token = None;
+        loop {
+            let response = self
+                .resource_request(
+                    EndPoint::Reviews("-".to_string(), location.name.clone()),
+                    next_page_token.clone(),
+                )
+                .await?;
+            let resp2 = self
+                .resource_request(
+                    EndPoint::Reviews("-".to_string(), location.name.clone()),
+                    next_page_token.clone(),
+                )
+                .await?;
+            //println!("{:#?}", resp2.text().await?);
+            let resp: Value = response.json().await?;
+            let val_pages = &resp.get("reviews").unwrap().as_array().unwrap().clone();
+            let rev: Vec<Review> = val_pages
+                .iter()
+                .map(|v| serde_json::from_value(v.clone()).unwrap())
+                .collect();
+            reviews.extend(rev);
+            next_page_token = resp.get("nextPageToken").cloned();
+            if next_page_token.is_none() {
+                break;
+            };
+        }
+        info!("Retrieved {} reviews", reviews.len());
+        Ok(reviews)
     }
 
     async fn review_summary(&mut self, location: &Location) -> Result<Value> {

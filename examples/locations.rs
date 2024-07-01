@@ -16,10 +16,11 @@ static MY_BUSINESS_SERVICE_SCOPE: &str = "https://www.googleapis.com/auth/plus.b
 #[tokio::main]
 async fn main() -> Result<()> {
     //let _ = fn_get_locations().await?;
-    let locations_with_details = fn_get_locations_details().await?;
-    println!("{:#?}", locations_with_details);
+    //let locations_with_details = fn_get_locations_details().await?;
+    //println!("{:#?}", locations_with_details);
 
-    let _ = fn_update_location().await?;
+    // let _ = fn_update_location().await?;
+    let _ = fn_review_by_location().await?;
 
     Ok(())
 }
@@ -65,6 +66,31 @@ async fn fn_update_location() -> Result<()> {
     let access_token = get_token().await;
     let mut business_service = BusinessService::new(&access_token);
     let _ = business_service.update_location(&loc).await?;
+
+    Ok(())
+}
+
+async fn fn_review_by_location() -> Result<()> {
+    let access_token = get_token().await;
+    let mut business_service = BusinessService::new(&access_token);
+
+    //let locations = business_service.get_locations("-").await?;
+    let loc = Location {
+        name: "locations/5031657144081502405".to_string(),
+        title: "Waves Hand Car Wash Sutton-Cheam".to_string(),
+        store_code: "3235".to_string(),
+        ..Default::default()
+    };
+    let revs = business_service.reviews_by_location(&loc).await?;
+
+    println!("{revs:#?}");
+
+    println!("{:#?}", revs.len());
+    /*
+    for loca in locations.locations {
+        business_service.review_summary(&loca).await?;
+    }
+    */
 
     Ok(())
 }

@@ -6,7 +6,7 @@ version = "0.2.0"
 name = "google_api_rust_client_not_official"
 
 [dependencies]
-chrono = "0.4.26"
+chrono = { version = "0.4.26", features = ["serde"] }
 jsonwebtoken = "8.3.0"
 reqwest = { version = "0.11.18", features = ["multipart", "json"] }
 serde = { version = "1.0.182", features = ["derive"] }
@@ -20,3 +20,4 @@ anyhow = "1.0.75"
 logger = "0.4.0"
 log = "0.4.22"
 futures = { version = "0.3.30"}
+chron = "0.1.4"
