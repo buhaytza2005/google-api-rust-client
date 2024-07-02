@@ -33,7 +33,7 @@ impl EndPoint {
             }
             EndPoint::LocationsEndpoint(account) => {
                 format!(
-                    "/v1/accounts/{}/locations?readMask=name,title,storeCode",
+                    "/v1/accounts/{}/locations?readMask=name,title,storeCode,metadata",
                     account
                 )
             }

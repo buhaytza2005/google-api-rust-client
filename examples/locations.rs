@@ -52,7 +52,7 @@ async fn fn_get_locations() -> Result<Locations> {
 async fn fn_get_locations_details() -> Result<Locations> {
     let access_token = get_token().await;
     let mut business_service = BusinessService::new(&access_token);
-    let mask = vec!["name", "storeCode", "title"];
+    let mask = vec!["name", "storeCode", "title", "metadata"];
 
     let locations = business_service.get_locations_details("-", mask).await?;
 

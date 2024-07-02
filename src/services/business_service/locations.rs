@@ -14,6 +14,7 @@ pub struct Location {
     pub open_info: Option<OpenInfo>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub regular_hours: Option<BusinessHours>,
+    pub metadata: Option<Metadata>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -124,4 +125,20 @@ pub struct TimeOfDay {
     pub seconds: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub nanos: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Metadata {
+    ///Output only. Indicates whether the place ID associated with this location
+    ///has updates that need to be updated or rejected by the client. If this boolean is set,
+    ///you should call the getGoogleUpdated method to lookup information that's needs to be verified.
+    pub has_google_updated: Option<bool>,
+    ///Output only. If this locationappears on Google Maps, this field is populated with
+    ///the place ID for the location. This ID can be used in various Places APIs.
+    pub place_id: Option<String>,
+    ///Output only. The location resource that this location duplicates.
+    pub duplicate_location: Option<String>,
+    ///Output only. A link to the page on Google Search where a customer can leave a review for the location.
+    pub new_review_uri: Option<String>,
 }
