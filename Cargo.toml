@@ -1,5 +1,5 @@
 [package]
-name = "google-api-rust-client-not-offical"
+name = "google-api-rust-client-not-official"
 edition = "2021"
 version = "0.2.0"
 [lib]
