@@ -412,7 +412,7 @@ async fn find_cutoff(
                 ));
             } else {
                 match google_reviews.iter().position(|rev| {
-                    rev.update_time >= data.last_update && rev.review_id == data.location
+                    rev.update_time >= data.last_update && rev.review_id == data.review_id
                 }) {
                     Some(position) => Ok(position),
                     None => return Err(anyhow!("could not find the last entry, keep going")),
