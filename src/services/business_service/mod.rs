@@ -411,25 +411,27 @@ async fn find_cutoff(
     match stopper {
         None => Err(anyhow!("Stopper does not exist, must keep checking")),
         Some(data) => {
+            /*
             if total_reviews_count < data.total_reviews {
                 return Err(anyhow!(
                     "reviews have been removed from Google, need to deal with it"
                 ));
             } else {
-                match google_reviews.iter().position(|rev| {
-                    println!(
-                        "comparing {:#?} to {:#?}",
-                        rev.update_time.unwrap().round_subsecs(0),
-                        data.last_update.unwrap().round_subsecs(0)
-                    );
-                    rev.update_time.unwrap().round_subsecs(0)
-                        >= data.last_update.unwrap().round_subsecs(0)
-                        && rev.review_id == data.review_id
-                }) {
-                    Some(position) => Ok(position),
-                    None => return Err(anyhow!("could not find the last entry, keep going")),
-                }
+            */
+            match google_reviews.iter().position(|rev| {
+                println!(
+                    "comparing {:#?} to {:#?}",
+                    rev.update_time.unwrap().round_subsecs(0),
+                    data.last_update.unwrap().round_subsecs(0)
+                );
+                rev.update_time.unwrap().round_subsecs(0)
+                    >= data.last_update.unwrap().round_subsecs(0)
+                    && rev.review_id == data.review_id
+            }) {
+                Some(position) => Ok(position),
+                None => return Err(anyhow!("could not find the last entry, keep going")),
             }
+            //}
         }
     }
 }
