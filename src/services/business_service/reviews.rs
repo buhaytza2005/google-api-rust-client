@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Review {
     pub review_id: String,
@@ -14,13 +14,13 @@ pub struct Review {
     pub update_time: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Reviewer {
     pub display_name: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Rating {
     #[serde(rename = "STAR_RATING_UNSPECIFIED")]
@@ -51,12 +51,12 @@ impl Stringer for Rating {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Stopper {
-    pub location: String,
+    pub review_id: String,
     pub total_reviews: i32,
     pub last_update: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewReply {
     pub comment: Option<String>,

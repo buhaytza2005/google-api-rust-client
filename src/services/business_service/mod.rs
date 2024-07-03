@@ -3,8 +3,6 @@ pub mod endpoint;
 pub mod locations;
 pub mod reviews;
 
-use std::collections::HashMap;
-
 use accounts::{Accounts, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
 use endpoint::EndPoint;
@@ -15,9 +13,10 @@ use reqwest::{
     header::{self, HeaderValue},
     Response,
 };
-use reviews::Review;
+use reviews::{Review, Stopper};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
 
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Default, Clone)]
 pub struct BusinessService {
@@ -73,6 +72,7 @@ pub trait BusinessRequest {
     fn reviews_by_location(
         &mut self,
         location: &Location,
+        stopper: Option<Stopper>,
     ) -> impl std::future::Future<Output = Result<HashMap<String, Vec<Review>>>> + Send;
 
     fn review_summary(
@@ -277,6 +277,11 @@ impl BusinessRequest for BusinessService {
     }
 
     ///gets reviews by location
+    ///Args:
+    ///
+    ///- `location` -> `Location` object with all the relevant details
+    ///- `stopper` -> `Stopper` instance; this represents a cut off point for reviews to be
+    ///retrieved.
     ///
     ///The api endpoint leaves much to be desired in terms of functionality. Cannot filter by date
     ///as far as I can tell which means that whenever a report needs to be generated, all reviews
@@ -296,9 +301,11 @@ impl BusinessRequest for BusinessService {
     ///The hashmap return type ensures that if multiple locations are being managed, reviews can
     ///be aggregated by location. Especially good if building a local cache of reviews for
     ///reporting purposes.
+    ///
     async fn reviews_by_location(
         &mut self,
         location: &Location,
+        stopper: Option<Stopper>,
     ) -> Result<HashMap<String, Vec<Review>>> {
         let mut results: HashMap<String, Vec<Review>> = HashMap::new();
         let mut reviews: Vec<Review> = Vec::new();
@@ -312,13 +319,33 @@ impl BusinessRequest for BusinessService {
                 .await?;
 
             let resp: Value = response.json().await?;
+
+            let total_reviews_google: i32 = resp
+                .get("totalReviewCount")
+                .and_then(|v| v.as_i64())
+                .unwrap_or_default() as i32;
+
             if let Some(v) = &resp.get("reviews") {
-                let val_pages = v.as_array().unwrap().clone();
-                let rev: Vec<Review> = val_pages
+                let temporary = v.as_array().unwrap().clone();
+                let rev: Vec<Review> = temporary
                     .iter()
                     .map(|v| serde_json::from_value(v.clone()).unwrap())
                     .collect();
-                reviews.extend(rev);
+
+                reviews.extend(rev.clone());
+                match find_cutoff(total_reviews_google, &rev, stopper.clone()).await {
+                    Err(_) => {}
+                    Ok(position) => {
+                        let found = &rev[position];
+                        let needle = reviews
+                            .iter()
+                            .position(|r| r == found)
+                            .expect("the review should exist in the main result vector");
+
+                        reviews = reviews[..needle].to_vec();
+                        break;
+                    }
+                };
                 next_page_token = resp.get("nextPageToken").cloned();
             } else {
                 break;
@@ -344,6 +371,7 @@ impl BusinessRequest for BusinessService {
         }
 
         let resp: serde_json::Value = res.json().await.expect("should have json");
+
         let total_reviews = resp.get("totalReviewCount").unwrap_or(&Value::Null);
         let rating = resp.get("averageRating").unwrap_or(&Value::Null);
         println!("{:#?}", location);
@@ -367,5 +395,29 @@ impl BusinessRequest for BusinessService {
         println!("{:#?}", resp);
 
         Ok(())
+    }
+}
+
+async fn find_cutoff(
+    total_reviews_count: i32,
+    google_reviews: &Vec<Review>,
+    stopper: Option<Stopper>,
+) -> Result<usize> {
+    match stopper {
+        None => Err(anyhow!("Stopper does not exist, must keep checking")),
+        Some(data) => {
+            if total_reviews_count < data.total_reviews {
+                return Err(anyhow!(
+                    "reviews have been removed from Google, need to deal with it"
+                ));
+            } else {
+                match google_reviews.iter().position(|rev| {
+                    rev.update_time >= data.last_update && rev.review_id == data.location
+                }) {
+                    Some(position) => Ok(position),
+                    None => return Err(anyhow!("could not find the last entry, keep going")),
+                }
+            }
+        }
     }
 }
