@@ -312,13 +312,17 @@ impl BusinessRequest for BusinessService {
                 .await?;
 
             let resp: Value = response.json().await?;
-            let val_pages = &resp.get("reviews").unwrap().as_array().unwrap().clone();
-            let rev: Vec<Review> = val_pages
-                .iter()
-                .map(|v| serde_json::from_value(v.clone()).unwrap())
-                .collect();
-            reviews.extend(rev);
-            next_page_token = resp.get("nextPageToken").cloned();
+            if let Some(v) = &resp.get("reviews") {
+                let val_pages = v.as_array().unwrap().clone();
+                let rev: Vec<Review> = val_pages
+                    .iter()
+                    .map(|v| serde_json::from_value(v.clone()).unwrap())
+                    .collect();
+                reviews.extend(rev);
+                next_page_token = resp.get("nextPageToken").cloned();
+            } else {
+                break;
+            }
             if next_page_token.is_none() {
                 break;
             };
