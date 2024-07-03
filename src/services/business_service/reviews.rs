@@ -32,6 +32,19 @@ pub enum Rating {
     Five,
 }
 
+impl Rating {
+    fn to_str(self) -> String {
+        match self {
+            Rating::StarRatingUnspecified => "STAR_RATING_UNSPECIFIED".to_string(),
+            Rating::One => "ONE".to_string(),
+            Rating::Two => "TWO".to_string(),
+            Rating::Three => "THREE".to_string(),
+            Rating::Four => "FOUR".to_string(),
+            Rating::Five => "FIVE".to_string(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewReply {
