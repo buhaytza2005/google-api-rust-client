@@ -11,6 +11,7 @@ pub struct Review {
     pub star_rating: Option<Rating>,
     pub review_reply: Option<ReviewReply>,
     pub create_time: Option<DateTime<Utc>>,
+    pub update_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

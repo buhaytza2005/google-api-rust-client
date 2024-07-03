@@ -3,6 +3,8 @@ pub mod endpoint;
 pub mod locations;
 pub mod reviews;
 
+use std::collections::HashMap;
+
 use accounts::{Accounts, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
 use endpoint::EndPoint;
@@ -71,7 +73,7 @@ pub trait BusinessRequest {
     fn reviews_by_location(
         &mut self,
         location: &Location,
-    ) -> impl std::future::Future<Output = Result<Vec<Review>>> + Send;
+    ) -> impl std::future::Future<Output = Result<HashMap<String, Vec<Review>>>> + Send;
 
     fn review_summary(
         &mut self,
@@ -274,7 +276,12 @@ impl BusinessRequest for BusinessService {
         Ok(results)
     }
 
-    async fn reviews_by_location(&mut self, location: &Location) -> Result<Vec<Review>> {
+    ///gets reviews by location
+    async fn reviews_by_location(
+        &mut self,
+        location: &Location,
+    ) -> Result<HashMap<String, Vec<Review>>> {
+        let mut results: HashMap<String, Vec<Review>> = HashMap::new();
         let mut reviews: Vec<Review> = Vec::new();
         let mut next_page_token = None;
         loop {
@@ -284,13 +291,7 @@ impl BusinessRequest for BusinessService {
                     next_page_token.clone(),
                 )
                 .await?;
-            let resp2 = self
-                .resource_request(
-                    EndPoint::Reviews("-".to_string(), location.name.clone()),
-                    next_page_token.clone(),
-                )
-                .await?;
-            //println!("{:#?}", resp2.text().await?);
+
             let resp: Value = response.json().await?;
             let val_pages = &resp.get("reviews").unwrap().as_array().unwrap().clone();
             let rev: Vec<Review> = val_pages
@@ -303,8 +304,9 @@ impl BusinessRequest for BusinessService {
                 break;
             };
         }
-        info!("Retrieved {} reviews", reviews.len());
-        Ok(reviews)
+
+        let _ = results.insert(location.name.clone(), reviews);
+        Ok(results)
     }
 
     async fn review_summary(&mut self, location: &Location) -> Result<Value> {
