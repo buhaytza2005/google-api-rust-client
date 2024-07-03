@@ -5,6 +5,7 @@ pub mod reviews;
 
 use accounts::{Accounts, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
+use chrono::SubsecRound;
 use endpoint::EndPoint;
 use futures::stream::{FuturesUnordered, StreamExt};
 use locations::{Location, Locations};
@@ -412,7 +413,9 @@ async fn find_cutoff(
                 ));
             } else {
                 match google_reviews.iter().position(|rev| {
-                    rev.update_time >= data.last_update && rev.review_id == data.review_id
+                    rev.update_time.unwrap().round_subsecs(0)
+                        >= data.last_update.unwrap().round_subsecs(0)
+                        && rev.review_id == data.review_id
                 }) {
                     Some(position) => Ok(position),
                     None => return Err(anyhow!("could not find the last entry, keep going")),
