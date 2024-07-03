@@ -45,6 +45,12 @@ impl Rating {
     }
 }
 
+pub struct Stopper {
+    pub location: String,
+    pub total_reviews: i32,
+    pub last_update: Option<DateTime<Utc>>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewReply {
