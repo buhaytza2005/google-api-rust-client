@@ -404,6 +404,7 @@ async fn find_cutoff(
     google_reviews: &Vec<Review>,
     stopper: Option<Stopper>,
 ) -> Result<usize> {
+    println!("Checkingggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
     match stopper {
         None => Err(anyhow!("Stopper does not exist, must keep checking")),
         Some(data) => {
