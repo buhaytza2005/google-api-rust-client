@@ -335,7 +335,8 @@ impl BusinessRequest for BusinessService {
 
                 reviews.extend(rev.clone());
                 println!("Checkingggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
-                match find_cutoff(total_reviews_google, &rev, stopper.clone()).await {
+                let result = find_cutoff(total_reviews_google, &rev, stopper.clone());
+                match result.await {
                     Err(_) => {}
                     Ok(position) => {
                         let found = &rev[position];
