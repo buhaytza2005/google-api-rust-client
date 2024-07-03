@@ -33,7 +33,7 @@ pub enum Rating {
 }
 
 impl Rating {
-    fn to_str(self) -> String {
+    pub fn to_str(self) -> String {
         match self {
             Rating::StarRatingUnspecified => "STAR_RATING_UNSPECIFIED".to_string(),
             Rating::One => "ONE".to_string(),
