@@ -334,7 +334,6 @@ impl BusinessRequest for BusinessService {
                     .collect();
 
                 reviews.extend(rev.clone());
-                println!("Checkingggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
                 let result = find_cutoff(total_reviews_google, &rev, stopper.clone());
                 match result.await {
                     Err(_) => {}
