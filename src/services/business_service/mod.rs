@@ -413,6 +413,11 @@ async fn find_cutoff(
                 ));
             } else {
                 match google_reviews.iter().position(|rev| {
+                    println!(
+                        "comparing {:#?} to {:#?}",
+                        rev.update_time.unwrap().round_subsecs(0),
+                        data.last_update.unwrap().round_subsecs(0)
+                    );
                     rev.update_time.unwrap().round_subsecs(0)
                         >= data.last_update.unwrap().round_subsecs(0)
                         && rev.review_id == data.review_id
