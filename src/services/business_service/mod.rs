@@ -277,6 +277,25 @@ impl BusinessRequest for BusinessService {
     }
 
     ///gets reviews by location
+    ///
+    ///The api endpoint leaves much to be desired in terms of functionality. Cannot filter by date
+    ///as far as I can tell which means that whenever a report needs to be generated, all reviews
+    ///must be retrieved.
+    ///https://developers.google.com/my-business/reference/rest/v4/accounts.locations.reviews/list
+    ///
+    ///Only accepted query parameters for the api are:
+    ///- pageSize
+    ///- pageToken
+    ///- orderBy - "Specifies the field to sort reviews by. If unspecified, the order of reviews
+    ///returned will default to updateTime desc. Valid orders to sort by are rating, rating desc
+    ///and updateTime desc."
+    ///
+    ///Simple way to speed this up is to have a local database to cache the results.
+    ///
+    ///If being used to manage a single location, reviews Vec can be extracted.
+    ///The hashmap return type ensures that if multiple locations are being managed, reviews can
+    ///be aggregated by location. Especially good if building a local cache of reviews for
+    ///reporting purposes.
     async fn reviews_by_location(
         &mut self,
         location: &Location,
