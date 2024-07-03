@@ -32,8 +32,12 @@ pub enum Rating {
     Five,
 }
 
-impl Rating {
-    pub fn to_str(self) -> String {
+pub trait Stringer {
+    fn to_str(&self) -> String;
+}
+
+impl Stringer for Rating {
+    fn to_str(&self) -> String {
         match self {
             Rating::StarRatingUnspecified => "STAR_RATING_UNSPECIFIED".to_string(),
             Rating::One => "ONE".to_string(),
@@ -45,6 +49,7 @@ impl Rating {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Stopper {
     pub location: String,
     pub total_reviews: i32,
