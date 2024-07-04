@@ -151,6 +151,7 @@ impl BusinessRequest for BusinessService {
     ) -> Result<Response> {
         let mut url = EndPoint::build(endpoint).expect("could not build accounts url");
         url.push_str(format!("?updateMask={}", update_mask).as_str());
+        println!("url {}", url);
         let client = reqwest::Client::builder().build()?;
         let res = client
             .patch(url)
