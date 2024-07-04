@@ -36,8 +36,8 @@ pub struct Admins {
 }
 #[derive(Debug, Deserialize, Clone)]
 pub struct Admin {
-    pub account: String,
-    pub admin: String,
-    pub name: String,
-    pub role: String,
+    pub account: Option<String>,
+    pub admin: Option<String>,
+    pub name: Option<String>,
+    pub role: Option<String>,
 }
