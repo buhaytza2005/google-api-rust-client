@@ -17,7 +17,7 @@ pub struct Account {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Accounts {
-    pub accounts: Vec<Account>,
+    pub accounts: Option<Vec<Account>>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
