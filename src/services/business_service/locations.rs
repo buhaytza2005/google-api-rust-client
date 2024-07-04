@@ -85,13 +85,13 @@ pub struct GoogleDate {
     pub day: Option<u64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct BusinessHours {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub periods: Option<Vec<TimePeriod>>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct TimePeriod {
     pub open_day: DayOfWeek,
@@ -100,7 +100,7 @@ pub struct TimePeriod {
     pub close_time: Option<TimeOfDay>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum DayOfWeek {
     #[serde(rename = "DAY_OF_THE_WEEK_UNSPECIFIED")]
@@ -114,7 +114,7 @@ pub enum DayOfWeek {
     Sunday,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct TimeOfDay {
     #[serde(skip_serializing_if = "Option::is_none", default)]
