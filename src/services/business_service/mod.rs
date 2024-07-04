@@ -8,7 +8,7 @@ use anyhow::{anyhow, Result};
 use chrono::SubsecRound;
 use endpoint::EndPoint;
 use futures::stream::{FuturesUnordered, StreamExt};
-use locations::{Location, Locations};
+use locations::{Location, Locations, UpdateLocation};
 use log::info;
 use reqwest::{
     header::{self, HeaderValue},
@@ -39,7 +39,7 @@ pub trait BusinessRequest {
     fn update_request(
         &mut self,
         endpoint: EndPoint,
-        payload: &Location,
+        payload: &UpdateLocation,
         update_mask: String,
     ) -> impl std::future::Future<Output = Result<Response>> + Send;
 
@@ -146,7 +146,7 @@ impl BusinessRequest for BusinessService {
     async fn update_request(
         &mut self,
         endpoint: EndPoint,
-        payload: &Location,
+        payload: &UpdateLocation,
         update_mask: String,
     ) -> Result<Response> {
         let mut url = EndPoint::build(endpoint).expect("could not build accounts url");
@@ -406,8 +406,11 @@ impl BusinessRequest for BusinessService {
         let update_mask = update_mask.join(",");
         let endpoint = EndPoint::Location(location.name.clone());
 
+        let mut pay = UpdateLocation::default();
+        pay.open_info = location.open_info.clone();
+
         let res = self
-            .update_request(endpoint, location, update_mask)
+            .update_request(endpoint, &pay, update_mask)
             .await
             .expect("Should update");
 

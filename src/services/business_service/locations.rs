@@ -17,6 +17,23 @@ pub struct Location {
     pub metadata: Option<Metadata>,
     pub profile: Option<Profile>,
 }
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateLocation {
+    pub name: Option<String>,
+    pub title: Option<String>,
+    pub store_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub phone_numbers: Option<PhoneNumbers>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub storefront_address: Option<PostalAddress>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub open_info: Option<OpenInfo>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub regular_hours: Option<BusinessHours>,
+    pub metadata: Option<Metadata>,
+    pub profile: Option<Profile>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
