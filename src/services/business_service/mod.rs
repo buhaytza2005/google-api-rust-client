@@ -67,10 +67,7 @@ pub trait BusinessRequest {
         location: &Location,
     ) -> impl std::future::Future<Output = Result<PageAdmins>> + Send;
 
-    fn admins(
-        &mut self,
-        location: &Vec<Location>,
-    ) -> impl std::future::Future<Output = Result<Vec<PageAdmins>>> + Send;
+    async fn admins(&mut self, location: &Vec<Location>) -> Result<Vec<PageAdmins>>;
 
     fn reviews_by_location(
         &mut self,
@@ -83,7 +80,7 @@ pub trait BusinessRequest {
         location: &Location,
     ) -> impl std::future::Future<Output = Result<Value>> + Send;
 
-    async fn account(
+    fn account(
         &mut self,
         account_id: &str,
     ) -> impl std::future::Future<Output = Result<Response>> + Send;
