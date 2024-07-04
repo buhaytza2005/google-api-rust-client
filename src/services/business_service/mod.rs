@@ -40,6 +40,7 @@ pub trait BusinessRequest {
         &mut self,
         endpoint: EndPoint,
         payload: &Location,
+        update_mask: String,
     ) -> impl std::future::Future<Output = Result<Response>> + Send;
 
     fn accounts(&mut self) -> impl std::future::Future<Output = Result<Accounts>> + Send;
@@ -55,9 +56,10 @@ pub trait BusinessRequest {
         read_mask: Vec<T>,
     ) -> impl std::future::Future<Output = Result<Locations>> + Send;
 
-    fn update_location(
+    fn update_location<T: Into<String> + Send>(
         &mut self,
         location: &Location,
+        update_mask: Vec<T>,
     ) -> impl std::future::Future<Output = Result<()>> + Send;
 
     fn admin(
@@ -81,7 +83,7 @@ pub trait BusinessRequest {
         location: &Location,
     ) -> impl std::future::Future<Output = Result<Value>> + Send;
 
-    fn account(
+    async fn account(
         &mut self,
         account_id: &str,
     ) -> impl std::future::Future<Output = Result<Response>> + Send;
@@ -144,9 +146,14 @@ impl BusinessRequest for BusinessService {
         Ok(res)
     }
 
-    async fn update_request(&mut self, endpoint: EndPoint, payload: &Location) -> Result<Response> {
+    async fn update_request(
+        &mut self,
+        endpoint: EndPoint,
+        payload: &Location,
+        update_mask: String,
+    ) -> Result<Response> {
         let mut url = EndPoint::build(endpoint).expect("could not build accounts url");
-        url.push_str("?updateMask=title");
+        url.push_str(format!("?updateMask={}", update_mask).as_str());
         let client = reqwest::Client::builder().build()?;
         let res = client
             .patch(url)
@@ -392,11 +399,17 @@ impl BusinessRequest for BusinessService {
         Ok(resp)
     }
 
-    async fn update_location(&mut self, location: &Location) -> Result<()> {
+    async fn update_location<T: Into<String> + Send>(
+        &mut self,
+        location: &Location,
+        update_mask: Vec<T>,
+    ) -> Result<()> {
+        let update_mask: Vec<String> = update_mask.into_iter().map(Into::into).collect();
+        let update_mask = update_mask.join(",");
         let endpoint = EndPoint::Location(location.name.clone());
 
         let res = self
-            .update_request(endpoint, location)
+            .update_request(endpoint, location, update_mask)
             .await
             .expect("Should update");
 
