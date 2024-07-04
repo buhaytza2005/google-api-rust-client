@@ -17,7 +17,7 @@ pub struct Location {
     pub metadata: Option<Metadata>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct PhoneNumbers {
     #[serde(skip_serializing_if = "Option::is_none", default)]
