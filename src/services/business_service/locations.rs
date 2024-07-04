@@ -15,6 +15,7 @@ pub struct Location {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub regular_hours: Option<BusinessHours>,
     pub metadata: Option<Metadata>,
+    pub profile: Option<Profile>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -141,4 +142,10 @@ pub struct Metadata {
     pub duplicate_location: Option<String>,
     ///Output only. A link to the page on Google Search where a customer can leave a review for the location.
     pub new_review_uri: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Profile {
+    pub description: Option<String>,
 }

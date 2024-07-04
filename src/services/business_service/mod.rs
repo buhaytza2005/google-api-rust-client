@@ -80,6 +80,11 @@ pub trait BusinessRequest {
         &mut self,
         location: &Location,
     ) -> impl std::future::Future<Output = Result<Value>> + Send;
+
+    fn account(
+        &mut self,
+        account_id: &str,
+    ) -> impl std::future::Future<Output = Result<Response>> + Send;
 }
 
 impl BusinessService {
@@ -160,7 +165,7 @@ impl BusinessRequest for BusinessService {
     async fn accounts(&mut self) -> Result<Accounts> {
         let response = self.request(EndPoint::AccountsEndpoint).await?;
         let accounts: Accounts = response.json().await?;
-        if accounts.accounts.len() == 0 {
+        if accounts.accounts.clone().unwrap().len() == 0 {
             return Err(anyhow!("no accounts, something went wrong!"));
         }
         Ok(accounts)
@@ -399,6 +404,25 @@ impl BusinessRequest for BusinessService {
         println!("{:#?}", resp);
 
         Ok(())
+    }
+
+    async fn account(&mut self, account_id: &str) -> Result<Response> {
+        let url =
+            "https://mybusinessaccountmanagement.googleapis.com/v1/accounts/109318342629677901794";
+        let client = reqwest::Client::builder().build()?;
+        let res = client
+            .get(url)
+            .header(
+                header::AUTHORIZATION,
+                HeaderValue::from_str(&format!("Bearer {}", self.access_token.as_str())).unwrap(),
+            )
+            .header(header::CONTENT_TYPE, "application/json")
+            .send()
+            .await
+            .expect("Error with request");
+        println!("{:#?}", res);
+
+        Ok(res)
     }
 }
 
