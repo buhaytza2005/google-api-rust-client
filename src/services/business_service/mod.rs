@@ -62,6 +62,13 @@ pub trait BusinessRequest {
         update_mask: Vec<T>,
     ) -> impl std::future::Future<Output = Result<()>> + Send;
 
+    fn mark_as_temp_closed<T: Into<String> + Send>(
+        &mut self,
+        locations: &Location,
+        payload: &UpdateLocation,
+        update_mask: Vec<T>,
+    ) -> impl std::future::Future<Output = Result<Location>> + Send;
+
     fn admin(
         &mut self,
         location: &Location,
@@ -419,6 +426,24 @@ impl BusinessRequest for BusinessService {
         println!("{:#?}", resp);
 
         Ok(())
+    }
+    async fn mark_as_temp_closed<T: Into<String> + Send>(
+        &mut self,
+        locations: &Location,
+        payload: &UpdateLocation,
+        update_mask: Vec<T>,
+    ) -> Result<Location> {
+        let update_mask: Vec<String> = update_mask.into_iter().map(Into::into).collect();
+        let update_mask = update_mask.join(",");
+        let endpoint = EndPoint::Location(location.name.clone());
+        let res = self
+            .update_request(endpoint, &payload, update_mask)
+            .await
+            .expect("Should update");
+
+        let resp: Location = res.json().await?;
+
+        Ok(resp)
     }
 
     async fn account(&mut self, account_id: &str) -> Result<Response> {
