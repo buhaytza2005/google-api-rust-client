@@ -64,7 +64,7 @@ pub trait BusinessRequest {
 
     fn mark_as_temp_closed<T: Into<String> + Send>(
         &mut self,
-        locations: &Location,
+        location: &Location,
         payload: &UpdateLocation,
         update_mask: Vec<T>,
     ) -> impl std::future::Future<Output = Result<Location>> + Send;
@@ -429,7 +429,7 @@ impl BusinessRequest for BusinessService {
     }
     async fn mark_as_temp_closed<T: Into<String> + Send>(
         &mut self,
-        locations: &Location,
+        location: &Location,
         payload: &UpdateLocation,
         update_mask: Vec<T>,
     ) -> Result<Location> {
