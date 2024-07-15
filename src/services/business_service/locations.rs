@@ -20,8 +20,11 @@ pub struct Location {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateLocation {
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub store_code: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub phone_numbers: Option<PhoneNumbers>,
@@ -31,7 +34,9 @@ pub struct UpdateLocation {
     pub open_info: Option<OpenInfo>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub regular_hours: Option<BusinessHours>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub metadata: Option<Metadata>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub profile: Option<Profile>,
 }
 

@@ -16,7 +16,7 @@ static MY_BUSINESS_SERVICE_SCOPE: &str = "https://www.googleapis.com/auth/plus.b
 #[tokio::main]
 async fn main() -> Result<()> {
     //let _ = fn_get_locations().await?;
-    //let locations_with_details = fn_get_locations_details().await?;
+    let locations_with_details = fn_get_locations_details().await?;
     //println!("{:#?}", locations_with_details);
 
     // let _ = fn_update_location().await?;
@@ -65,7 +65,9 @@ async fn fn_update_location() -> Result<()> {
 
     let access_token = get_token().await;
     let mut business_service = BusinessService::new(&access_token);
-    let _ = business_service.update_location(&loc).await?;
+    let _ = business_service
+        .update_location(&loc, vec!["title"])
+        .await?;
 
     Ok(())
 }
@@ -81,7 +83,7 @@ async fn fn_review_by_location() -> Result<()> {
         store_code: "3235".to_string(),
         ..Default::default()
     };
-    let revs = business_service.reviews_by_location(&loc).await?;
+    let revs = business_service.reviews_by_location(&loc, None).await?;
 
     println!("{revs:#?}");
 
