@@ -57,7 +57,7 @@ pub enum AdminRole {
 }
 
 impl AdminRole {
-    fn as_str(&self) -> String {
+    pub fn as_str(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 }
