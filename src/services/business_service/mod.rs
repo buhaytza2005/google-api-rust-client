@@ -3,7 +3,7 @@ pub mod endpoint;
 pub mod locations;
 pub mod reviews;
 
-use accounts::{Accounts, Admins, PageAdmins};
+use accounts::{Accounts, Admin, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
 use chrono::SubsecRound;
 use endpoint::EndPoint;
@@ -73,6 +73,8 @@ pub trait BusinessRequest {
         &mut self,
         location: &Location,
     ) -> impl std::future::Future<Output = Result<PageAdmins>> + Send;
+
+    async fn invite_admin(&mut self, email: String, location: String) -> Result<Admin>;
 
     async fn admins(&mut self, location: &Vec<Location>) -> Result<Vec<PageAdmins>>;
 
@@ -274,6 +276,12 @@ impl BusinessRequest for BusinessService {
             admin_count: resp.admins.len(),
             admins: resp.admins,
         })
+    }
+    async fn invite_admin(&mut self, email: String, location: String) -> Result<Admin> {
+        let endpoint = EndPoint::InviteAdmin(email, location);
+        //TODO - ADD POST TO ENDPOINT
+        //
+        Ok(Admin::default())
     }
 
     async fn admins(&mut self, locations: &Vec<Location>) -> Result<Vec<PageAdmins>> {

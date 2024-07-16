@@ -34,10 +34,24 @@ pub struct PageAdmins {
 pub struct Admins {
     pub admins: Vec<Admin>,
 }
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Default, Deserialize, Clone)]
 pub struct Admin {
     pub account: Option<String>,
     pub admin: Option<String>,
     pub name: Option<String>,
-    pub role: Option<String>,
+    pub role: Option<AdminRole>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum AdminRole {
+    #[serde(rename = "ADMIN_ROLE_UNSPECIFIED")]
+    #[default]
+    AdminRoleUnspecified,
+    #[serde(rename = "PRIMARY_OWNER")]
+    PrimaryOwner,
+    Owner,
+    Manager,
+    #[serde(rename = "SITE_MANAGER")]
+    SiteManager,
 }

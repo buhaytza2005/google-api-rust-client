@@ -13,6 +13,8 @@ pub enum EndPoint {
     Location(String),
     ///Reviews(account_id, location_id)
     Reviews(String, String),
+    ///InviteAdmin(email, location_id)
+    InviteAdmin(String, String),
 }
 
 pub enum ResourceType {
@@ -43,6 +45,9 @@ impl EndPoint {
             EndPoint::Reviews(account_id, location_id) => {
                 format!("/v4/accounts/{}/{}/reviews", account_id, location_id)
             }
+            EndPoint::InviteAdmin(email, location_id) => {
+                format!("/v1/accounts/-/{}/admins", location_id)
+            }
         }
     }
     ///builds url for endpoint, including the main url and endpoint
@@ -72,6 +77,10 @@ impl EndPoint {
                 Ok("https://mybusinessbusinessinformation.googleapis.com".into())
             }
             EndPoint::Reviews(_, _) => Ok("https://mybusiness.googleapis.com".into()),
+
+            EndPoint::InviteAdmin(_, _) => {
+                Ok("https://mybusinessaccountmanagement.googleapis.com".into())
+            }
         }
     }
 }
