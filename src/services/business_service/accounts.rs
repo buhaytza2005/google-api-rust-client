@@ -55,3 +55,9 @@ pub enum AdminRole {
     #[serde(rename = "SITE_MANAGER")]
     SiteManager,
 }
+
+impl AdminRole {
+    fn as_str(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+}
