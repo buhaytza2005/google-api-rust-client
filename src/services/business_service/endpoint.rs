@@ -46,7 +46,7 @@ impl EndPoint {
                 format!("/v4/accounts/{}/{}/reviews", account_id, location_id)
             }
             EndPoint::InviteAdmin(email, location_id) => {
-                format!("/v1/accounts/-/{}/admins", location_id)
+                format!("/v1/{}/admins", location_id)
             }
         }
     }
@@ -79,6 +79,7 @@ impl EndPoint {
             EndPoint::Reviews(_, _) => Ok("https://mybusiness.googleapis.com".into()),
 
             EndPoint::InviteAdmin(_, _) => {
+                //Ok("https://mybusinessbusinessinformation.googleapis.com".into())
                 Ok("https://mybusinessaccountmanagement.googleapis.com".into())
             }
         }

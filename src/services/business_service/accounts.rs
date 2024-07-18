@@ -34,7 +34,7 @@ pub struct PageAdmins {
 pub struct Admins {
     pub admins: Vec<Admin>,
 }
-#[derive(Debug, Default, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Admin {
     pub account: Option<String>,
     pub admin: Option<String>,

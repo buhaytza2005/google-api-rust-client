@@ -3,7 +3,7 @@ pub mod endpoint;
 pub mod locations;
 pub mod reviews;
 
-use accounts::{Accounts, Admin, Admins, PageAdmins};
+use accounts::{Accounts, Admin, AdminRole, Admins, PageAdmins};
 use anyhow::{anyhow, Result};
 use chrono::SubsecRound;
 use endpoint::EndPoint;
@@ -74,7 +74,7 @@ pub trait BusinessRequest {
         location: &Location,
     ) -> impl std::future::Future<Output = Result<PageAdmins>> + Send;
 
-    async fn invite_admin(&mut self, email: String, location: String) -> Result<Admin>;
+    async fn invite_admin(&mut self, email: String, location: String) -> Result<()>;
 
     async fn admins(&mut self, location: &Vec<Location>) -> Result<Vec<PageAdmins>>;
 
@@ -277,11 +277,48 @@ impl BusinessRequest for BusinessService {
             admins: resp.admins,
         })
     }
-    async fn invite_admin(&mut self, email: String, location: String) -> Result<Admin> {
-        let endpoint = EndPoint::InviteAdmin(email, location);
+    ///* `location_name`: "locations/{id}" ex: locations/123123216321
+    async fn invite_admin(&mut self, email: String, location_name: String) -> Result<()> {
+        let endpoint = EndPoint::InviteAdmin(email.clone(), location_name);
+        let url = EndPoint::build(endpoint).expect("could not build admin endpoint");
+
+        let adm = Admin {
+            name: Some(email.clone()),
+            role: Some(AdminRole::Manager),
+            ..Default::default()
+        };
+        #[derive(Debug, Default, Serialize, Deserialize, Clone)]
+        struct Wtf {
+            admin: String,
+            role: String,
+        }
+
+        let a = Wtf {
+            admin: email.clone(),
+            role: "MANAGER".to_string(),
+        };
+        println!("{:#?}", url);
+
         //TODO - ADD POST TO ENDPOINT
+        let client = reqwest::Client::builder().build()?;
+        let res = client
+            .post(url)
+            .header(
+                header::AUTHORIZATION,
+                HeaderValue::from_str(&format!("Bearer {}", self.access_token.as_str())).unwrap(),
+            )
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(serde_json::to_string(&a)?)
+            .send()
+            .await
+            .expect("Error with post request to admin");
+
+        let resp: serde_json::Value = res.json().await?;
+        println!("{:#?}", resp);
+        //println!("{:#?}", serde_json::to_string(&adm));
+        //println!("{:#?}", res.text().await?);
         //
-        Ok(Admin::default())
+        Ok(())
     }
 
     async fn admins(&mut self, locations: &Vec<Location>) -> Result<Vec<PageAdmins>> {
