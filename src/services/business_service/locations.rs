@@ -74,7 +74,7 @@ pub struct PostalAddress {
     pub organization: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenInfo {
     #[serde(skip_serializing_if = "Option::is_none", default)]
@@ -85,7 +85,7 @@ pub struct OpenInfo {
     pub opening_date: Option<GoogleDate>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum OpenForBusiness {
     #[serde(rename = "OPEN_FOR_BUSINESS_UNSPECIFIED")]
@@ -98,7 +98,7 @@ pub enum OpenForBusiness {
     ClosedTemporarily,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct GoogleDate {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub year: Option<u64>,
