@@ -49,6 +49,11 @@ pub trait BusinessRequest {
         &mut self,
         account_id: &str,
     ) -> impl std::future::Future<Output = Result<Locations>> + Send;
+    fn get_location(
+        &mut self,
+        account_id: &str,
+        location_id: &str,
+    ) -> impl std::future::Future<Output = Result<Location>> + Send;
 
     fn get_locations_details<T: Into<String> + Send>(
         &mut self,
@@ -184,6 +189,10 @@ impl BusinessRequest for BusinessService {
         }
         Ok(accounts)
     }
+    async fn get_location(&mut self, account_id: &str, location_id: &str) -> Result<Location> {
+        Ok(Location::default())
+    }
+    ///TODO Add single location query
     /// must be sequential as the `nextPageToken` is needed to process the rest of the locations
     ///
     /// * `account id` - ID of account that manages the locations, for service account use `"-"`
