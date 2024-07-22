@@ -488,9 +488,16 @@ impl BusinessRequest for BusinessService {
             .await
             .expect("Should update");
 
-        let resp: Location = res.json().await?;
+        let status = res.status();
+        let body = res.text().await?;
+        if !status.is_success() {
+            println!("Error resp: {:#?}", body);
+            return Err(anyhow!("failed to update: {:?}", body));
+        }
 
-        Ok(resp)
+        let value: Location = serde_json::from_str(&body)?;
+
+        Ok(value)
     }
 
     async fn account(&mut self, account_id: &str) -> Result<Response> {
