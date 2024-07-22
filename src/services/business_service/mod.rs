@@ -295,6 +295,7 @@ impl BusinessRequest for BusinessService {
 
         let adm = Admin {
             name: Some(email.clone()),
+            admin: Some(email.clone()),
             role: Some(AdminRole::Manager),
             ..Default::default()
         };
