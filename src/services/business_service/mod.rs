@@ -98,6 +98,8 @@ pub trait BusinessRequest {
         &mut self,
         account_id: &str,
     ) -> impl std::future::Future<Output = Result<Response>> + Send;
+    async fn get_place_actions(&mut self) -> Result<()>;
+    async fn get_location_place_actions(&mut self, location: String) -> Result<()>;
 }
 
 impl BusinessService {
@@ -508,6 +510,24 @@ impl BusinessRequest for BusinessService {
         println!("{:#?}", res);
 
         Ok(res)
+    }
+
+    async fn get_place_actions(&mut self) -> Result<()> {
+        let endpoint = EndPoint::BusinessPlaceActions;
+        let resp = self.request(endpoint).await?;
+        if resp.status().is_success() {
+            println!("{:#?}", resp.json::<serde_json::Value>().await?);
+        }
+        Ok(())
+    }
+
+    async fn get_location_place_actions(&mut self, location: String) -> Result<()> {
+        let endpoint = EndPoint::BusinessPlaceActionsForLocation(location);
+        let resp = self.request(endpoint).await?;
+        if resp.status().is_success() {
+            println!("{:#?}", resp.json::<serde_json::Value>().await?);
+        }
+        Ok(())
     }
 }
 

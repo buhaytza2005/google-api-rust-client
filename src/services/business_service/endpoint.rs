@@ -15,6 +15,10 @@ pub enum EndPoint {
     Reviews(String, String),
     ///InviteAdmin(email, location_id)
     InviteAdmin(String, String),
+    ///BusinessPlacesApi - to list all actions
+    BusinessPlaceActions,
+    ///BusinessPlacesApiForLocation(location as "locations/{locationId}")
+    BusinessPlaceActionsForLocation(String),
 }
 
 pub enum ResourceType {
@@ -47,6 +51,10 @@ impl EndPoint {
             }
             EndPoint::InviteAdmin(email, location_id) => {
                 format!("/v1/{}/admins", location_id)
+            }
+            EndPoint::BusinessPlaceActions => "/v1/placeActionTypeMetadata".to_string(),
+            EndPoint::BusinessPlaceActionsForLocation(location) => {
+                format!("/v1/{}/placeActionLinks", location)
             }
         }
     }
@@ -81,6 +89,14 @@ impl EndPoint {
             EndPoint::InviteAdmin(_, _) => {
                 //Ok("https://mybusinessbusinessinformation.googleapis.com".into())
                 Ok("https://mybusinessaccountmanagement.googleapis.com".into())
+            }
+            EndPoint::BusinessPlaceActions => {
+                //Ok("https://mybusinessbusinessinformation.googleapis.com".into())
+                Ok("https://mybusinessplaceactions.googleapis.com".into())
+            }
+            EndPoint::BusinessPlaceActionsForLocation(_) => {
+                //Ok("https://mybusinessbusinessinformation.googleapis.com".into())
+                Ok("https://mybusinessplaceactions.googleapis.com".into())
             }
         }
     }
