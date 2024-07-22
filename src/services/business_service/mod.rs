@@ -288,7 +288,7 @@ impl BusinessRequest for BusinessService {
             admins: resp.admins,
         })
     }
-    ///* `location_name`: "locations/{id}" ex: locations/123123216321
+    /// * `location_name`: "locations/{id}" ex: locations/123123216321
     async fn invite_admin(&mut self, email: String, location_name: String) -> Result<Admin> {
         let endpoint = EndPoint::InviteAdmin(email.clone(), location_name);
         let url = EndPoint::build(endpoint).expect("could not build admin endpoint");
