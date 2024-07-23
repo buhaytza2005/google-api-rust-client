@@ -55,6 +55,12 @@ pub trait BusinessRequest {
         location_id: &str,
     ) -> impl std::future::Future<Output = Result<Location>> + Send;
 
+    fn get_location_details<T: Into<String> + Send>(
+        &mut self,
+        location_id: &str,
+        read_mask: Vec<T>,
+    ) -> impl std::future::Future<Output = Result<Location>> + Send;
+
     fn get_locations_details<T: Into<String> + Send>(
         &mut self,
         account_id: &str,
@@ -194,7 +200,30 @@ impl BusinessRequest for BusinessService {
     async fn get_location(&mut self, account_id: &str, location_id: &str) -> Result<Location> {
         Ok(Location::default())
     }
-    ///TODO Add single location query
+    async fn get_location_details<T: Into<String> + Send>(
+        &mut self,
+        location_id: &str,
+        read_mask: Vec<T>,
+    ) -> Result<Location> {
+        let read_mask_str: Vec<String> = read_mask.into_iter().map(Into::into).collect();
+        let read_mask_joined = read_mask_str.join(",");
+        let res = self
+            .resource_request(
+                EndPoint::LocationsDetailsEndpoint(location_id.into(), read_mask_joined.clone()),
+                None,
+            )
+            .await?;
+        let status = res.status();
+        let body = res.text().await?;
+        if !status.is_success() {
+            println!("Error resp: {:#?}", body);
+            return Err(anyhow!("failed to retrieve the location: {:?}", body));
+        }
+
+        let value: Location = serde_json::from_str(&body)?;
+        Ok(value)
+    }
+
     /// must be sequential as the `nextPageToken` is needed to process the rest of the locations
     ///
     /// * `account id` - ID of account that manages the locations, for service account use `"-"`

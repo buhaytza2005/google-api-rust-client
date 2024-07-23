@@ -4,10 +4,14 @@ pub enum EndPoint {
     AccountsEndpoint,
     ///Must contain location name ''
     AdminEndpoint(String),
-    ///LocationDetailsEndpoint(account_id, read_mask)
+    ///LocationsDetailsEndpoint(account_id, read_mask)
     ///* account_id - for svc_account `"-"`
     ///* read_mask - Vector of strings with the fields for the mask
     LocationsDetailsEndpoint(String, String),
+    ///LocationDetailsEndpoint(location_id, read_mask)
+    ///* location_id - location name `location/<id>`
+    ///* read_mask - Vector of strings with the fields for the mask
+    LocationDetailsEndpoint(String, String),
     ///account_id
     LocationsEndpoint(String),
     Location(String),
@@ -46,10 +50,13 @@ impl EndPoint {
             EndPoint::LocationsDetailsEndpoint(account, read_mask) => {
                 format!("/v1/accounts/{}/locations?readMask={}", account, read_mask)
             }
+            EndPoint::LocationDetailsEndpoint(location_id, read_mask) => {
+                format!("/v1/accounts/{}?readMask={}", location_id, read_mask)
+            }
             EndPoint::Reviews(account_id, location_id) => {
                 format!("/v4/accounts/{}/{}/reviews", account_id, location_id)
             }
-            EndPoint::InviteAdmin(email, location_id) => {
+            EndPoint::InviteAdmin(_, location_id) => {
                 format!("/v1/{}/admins", location_id)
             }
             EndPoint::BusinessPlaceActions => "/v1/placeActionTypeMetadata".to_string(),
@@ -82,6 +89,9 @@ impl EndPoint {
                 Ok("https://mybusinessbusinessinformation.googleapis.com".into())
             }
             EndPoint::LocationsDetailsEndpoint(_, _) => {
+                Ok("https://mybusinessbusinessinformation.googleapis.com".into())
+            }
+            EndPoint::LocationDetailsEndpoint(_, _) => {
                 Ok("https://mybusinessbusinessinformation.googleapis.com".into())
             }
             EndPoint::Reviews(_, _) => Ok("https://mybusiness.googleapis.com".into()),
