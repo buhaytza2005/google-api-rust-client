@@ -209,7 +209,7 @@ impl BusinessRequest for BusinessService {
         let read_mask_joined = read_mask_str.join(",");
         let res = self
             .resource_request(
-                EndPoint::LocationsDetailsEndpoint(location_id.into(), read_mask_joined.clone()),
+                EndPoint::LocationDetailsEndpoint(location_id.into(), read_mask_joined.clone()),
                 None,
             )
             .await?;

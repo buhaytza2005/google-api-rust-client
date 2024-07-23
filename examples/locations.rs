@@ -16,15 +16,30 @@ static MY_BUSINESS_SERVICE_SCOPE: &str = "https://www.googleapis.com/auth/plus.b
 #[tokio::main]
 async fn main() -> Result<()> {
     //let _ = fn_get_locations().await?;
-    let locations_with_details = fn_get_locations_details().await?;
+    //let locations_with_details = fn_get_locations_details().await?;
     //println!("{:#?}", locations_with_details);
 
     // let _ = fn_update_location().await?;
-    let _ = fn_review_by_location().await?;
+    //let _ = fn_review_by_location().await?;
+    let _ = get_location_details().await?;
 
     Ok(())
 }
 
+async fn get_location_details() -> Result<()> {
+    let access_token = get_token().await;
+    let mut business_service = BusinessService::new(&access_token);
+
+    let location_id = "locations/559469233876173390";
+    let read_mask = vec!["openInfo", "storeCode", "title", "name", "phoneNumbers"];
+    let loc = business_service
+        .get_location_details(location_id, read_mask)
+        .await
+        .expect("should have a location with the details");
+
+    println!("{:#?}", loc);
+    Ok(())
+}
 async fn get_token() -> String {
     let filepath: PathBuf = PathBuf::from_str("credentials.json").expect("Is this missing?");
     let credentials = ServiceAccountCredentials::from_service_account_file(filepath)

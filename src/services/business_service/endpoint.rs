@@ -51,7 +51,7 @@ impl EndPoint {
                 format!("/v1/accounts/{}/locations?readMask={}", account, read_mask)
             }
             EndPoint::LocationDetailsEndpoint(location_id, read_mask) => {
-                format!("/v1/accounts/{}?readMask={}", location_id, read_mask)
+                format!("/v1/{}?readMask={}", location_id, read_mask)
             }
             EndPoint::Reviews(account_id, location_id) => {
                 format!("/v4/accounts/{}/{}/reviews", account_id, location_id)
