@@ -19,6 +19,8 @@ pub enum EndPoint {
     Reviews(String, String),
     ///InviteAdmin(email, location_id)
     InviteAdmin(String, String),
+    ///DeleteAdmin(location_id, account_id)
+    DeleteAdmin(String, String),
     ///BusinessPlacesApi - to list all actions
     BusinessPlaceActions,
     ///BusinessPlacesApiForLocation(location as "locations/{locationId}")
@@ -63,6 +65,9 @@ impl EndPoint {
             EndPoint::BusinessPlaceActionsForLocation(location) => {
                 format!("/v1/{}/placeActionLinks", location)
             }
+            EndPoint::DeleteAdmin(location_id, account_id) => {
+                format!("/v1/{}/admins/{}", location_id, account_id)
+            }
         }
     }
     ///builds url for endpoint, including the main url and endpoint
@@ -97,6 +102,10 @@ impl EndPoint {
             EndPoint::Reviews(_, _) => Ok("https://mybusiness.googleapis.com".into()),
 
             EndPoint::InviteAdmin(_, _) => {
+                //Ok("https://mybusinessbusinessinformation.googleapis.com".into())
+                Ok("https://mybusinessaccountmanagement.googleapis.com".into())
+            }
+            EndPoint::DeleteAdmin(_, _) => {
                 //Ok("https://mybusinessbusinessinformation.googleapis.com".into())
                 Ok("https://mybusinessaccountmanagement.googleapis.com".into())
             }

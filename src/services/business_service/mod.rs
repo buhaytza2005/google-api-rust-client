@@ -88,6 +88,7 @@ pub trait BusinessRequest {
     async fn invite_admin(&mut self, email: String, location: String) -> Result<Admin>;
 
     async fn admins(&mut self, location: &Vec<Location>) -> Result<Vec<PageAdmins>>;
+    async fn remove_admin(&mut self, location_name: String, account_id: String) -> Result<()>;
 
     fn reviews_by_location(
         &mut self,
@@ -372,7 +373,33 @@ impl BusinessRequest for BusinessService {
         Ok(results)
     }
 
-    ///gets reviews by location
+    async fn remove_admin(&mut self, location_name: String, account_id: String) -> Result<()> {
+        let endpoint = EndPoint::DeleteAdmin(location_name, account_id);
+        let url = EndPoint::build(endpoint).expect("could not build delete admin endpoint");
+
+        let client = reqwest::Client::builder().build()?;
+        let res = client
+            .delete(url)
+            .header(
+                header::AUTHORIZATION,
+                HeaderValue::from_str(&format!("Bearer {}", self.access_token.as_str())).unwrap(),
+            )
+            .header(header::CONTENT_TYPE, "application/json")
+            .send()
+            .await
+            .expect("Error with post request to admin");
+
+        let status = res.status();
+        let body = res.text().await?;
+        if !status.is_success() {
+            println!("Error resp: {:#?}", body);
+            return Err(anyhow!("failed to invite admin: {:?}", body));
+        }
+
+        Ok(())
+    }
+
+    ///gets reiews by location
     ///Args:
     ///
     ///- `location` -> `Location` object with all the relevant details
